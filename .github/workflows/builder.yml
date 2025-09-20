@@ -10,19 +10,19 @@ on:
         GSI:
               description: ' GSI Image Direct Link '
               required: true
-              default: 'https://github.com/ponces/treble_build_aosp/releases/download/v2023.12.01/aosp-arm64-ab-gapps-14.0-20231201.img.xz'        
+              default: 'https://sourceforge.net/projects/andyyan-gsi/files/lineage-20-td/History/lineage-20.0-20240818-UNOFFICIAL-arm64_bvN.img.xz'        
         NAME:
               description: 'Rom Name'
               required: true
-              default: 'aosp-arm64-ab-gapps-14.0-a03.7z'
+              default: 'lineage-20.0-a03.xz'
         VERSION:
               description: 'Baseband Version'
               required: true
-              default: 'A035FXXU4CWI1'
+              default: 'A035MUBS8CYA3'
         VENDOR:
               description: 'Enter Direct Link Of Your Version Vendor'
               required: true
-              default: 'https://sourceforge.net/projects/a03-files/files/A035FXXU4CWI1/vendor.img'
+              default: 'https://github.com/RodrigoRoze/a035m-files/releases/download/files/vendor.img'
 jobs:
   Build:
     runs-on: ubuntu-latest
@@ -35,7 +35,7 @@ jobs:
     - name: Install Dependencies
       run: |
         sudo apt update
-        sudo apt install -y zip xz-utils unzip p7zip-full wget
+        sudo apt install -y zip xz-utils unzip wget
         
     - name: Installing Tools
       run: |
@@ -56,18 +56,19 @@ jobs:
       run: |
         cd lpbinary/binary
         wget ${{ github.event.inputs.VENDOR }}
-        wget https://sourceforge.net/projects/a03-files/files/product.img
-        wget https://sourceforge.net/projects/a03-files/files/system_ext.img
+        wget https://github.com/RodrigoRoze/a035m-files/releases/download/files/product.img
+        wget https://github.com/RodrigoRoze/a035m-files/releases/download/files/system_ext.img
     - name: Packing
       run: |
         cd lpbinary/binary
         ./lpmake --metadata-size 65536 --super-name super --metadata-slots 2 --device super:6763315200 --group main:6761218048 --partition system:readonly:$(ls -nl system.img | awk '{print $5}'):main --image system=system.img --partition vendor:readonly:$(ls -nl vendor.img | awk '{print $5}'):main --image vendor=vendor.img --partition product:readonly:$(ls -nl product.img | awk '{print $5}'):main --image product=product.img --partition system_ext:readonly:$(ls -nl system_ext.img | awk '{print $5}'):main --image system_ext=system_ext.img --sparse --output super.img
-    - name: Creating tar and compressing to 7z
+    - name: Creating tar file and compressing to xz
       run: |
         cd lpbinary/binary
         tar -cvf super.tar super.img
         rm -rf super.img
-        7z a ${{ github.event.inputs.NAME }} super.tar
+        xz -9 -T0 -k super.tar
+        mv super.tar.xz ${{ github.event.inputs.NAME }}
         rm -rf super.tar
     - name: Upload to Release
       uses: softprops/action-gh-release@v1
@@ -79,6 +80,6 @@ jobs:
             Device: Samsung Galaxy A03
             Version: ${{ github.event.inputs.VERSION }}
             Rom Name: ${{ github.event.inputs.NAME }}
-            Flash: Extract the 7z file and flash through ODIN in AP Section.
+            Flash: Extract the xz file to get the tar file, then flash through ODIN in AP Section.
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
