@@ -14,7 +14,7 @@ on:
         NAME:
               description: 'Rom Name'
               required: true
-              default: 'lineage-20.0-a03.xz'
+              default: 'lineage-20.0-a03.zip'
         VERSION:
               description: 'Baseband Version'
               required: true
@@ -62,7 +62,7 @@ jobs:
       run: |
         cd lpbinary/binary
         ./lpmake --metadata-size 65536 --super-name super --metadata-slots 2 --device super:6763315200 --group main:6761218048 --partition system:readonly:$(ls -nl system.img | awk '{print $5}'):main --image system=system.img --partition vendor:readonly:$(ls -nl vendor.img | awk '{print $5}'):main --image vendor=vendor.img --partition product:readonly:$(ls -nl product.img | awk '{print $5}'):main --image product=product.img --partition system_ext:readonly:$(ls -nl system_ext.img | awk '{print $5}'):main --image system_ext=system_ext.img --sparse --output super.img
-    - name: Creating tar file and compressing to xz
+    - name: Creating tar file and compressing to zip
       run: |
         cd lpbinary/binary
         tar -cvf super.tar super.img
@@ -78,6 +78,6 @@ jobs:
             Device: Samsung Galaxy A03
             Version: ${{ github.event.inputs.VERSION }}
             Rom Name: ${{ github.event.inputs.NAME }}
-            Flash: Extract the xz file to get the tar file, then flash through ODIN in AP Section.
+            Flash: Extract the zip file to get the tar file, then flash through ODIN in AP Section.
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
