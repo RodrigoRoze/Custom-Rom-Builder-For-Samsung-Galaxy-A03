@@ -68,6 +68,7 @@ jobs:
         tar -cvf super.tar super.img
         rm -rf super.img
         zip ${{ github.event.inputs.NAME }} super.tar
+        rm -rf super.tar
     - name: Upload to Release
       uses: softprops/action-gh-release@v1
       with:
